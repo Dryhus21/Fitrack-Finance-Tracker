@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    @apply h-full;
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+  }
+  .num {
+    font-feature-settings: "tnum", "lnum", "zero";
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  .hairline-b {
+    box-shadow: inset 0 -1px 0 0 hsl(0 0% 100% / 0.06);
+  }
+
+  .bg-dotted {
+    background-image: radial-gradient(
+      circle,
+      rgb(229 229 229 / 0.05) 1px,
+      transparent 1px
+    );
+    background-size: 22px 22px;
+    background-position: 0 0;
+  }
+
+  .bg-glow {
+    background-image:
+      radial-gradient(
+        ellipse 70% 50% at 12% 0%,
+        rgb(16 185 129 / 0.10),
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 60% 40% at 88% 100%,
+        rgb(249 115 22 / 0.06),
+        transparent 60%
+      );
+  }
+
+  /* Light theme override: dots lebih halus, glow lebih warm */
+  [data-theme="financeLight"] .bg-dotted {
+    background-image: radial-gradient(
+      circle,
+      rgb(10 10 10 / 0.06) 1px,
+      transparent 1px
+    );
+  }
+
+  [data-theme="financeLight"] .bg-glow {
+    background-image:
+      radial-gradient(
+        ellipse 70% 50% at 12% 0%,
+        rgb(5 150 105 / 0.07),
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 60% 40% at 88% 100%,
+        rgb(234 88 12 / 0.05),
+        transparent 60%
+      );
+  }
+
+  /* Accent stripe vertikal untuk hero card */
+  .accent-stripe-l {
+    position: relative;
+  }
+  .accent-stripe-l::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    border-radius: 3px 0 0 3px;
+    background: linear-gradient(
+      to bottom,
+      rgb(16 185 129 / 0.8),
+      rgb(16 185 129 / 0)
+    );
+  }
+  [data-theme="financeLight"] .accent-stripe-l::before {
+    background: linear-gradient(
+      to bottom,
+      rgb(5 150 105 / 0.8),
+      rgb(5 150 105 / 0)
+    );
+  }
+}
+
+::selection {
+  background: rgb(16 185 129 / 0.25);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(115 115 115 / 0.2);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(115 115 115 / 0.4);
+  background-clip: padding-box;
+}
