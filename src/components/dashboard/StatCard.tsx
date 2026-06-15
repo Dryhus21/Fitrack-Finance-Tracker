@@ -1,4 +1,7 @@
+"use client";
+
 import { IconTrendingDown, IconTrendingUp } from "@/components/icons";
+import { AnimatedNumber } from "./AnimatedNumber";
 
 type StatProps = {
   label: string;
@@ -10,37 +13,55 @@ type StatProps = {
 
 export function StatCard({ label, value, hint, icon, accentColor }: StatProps) {
   return (
-    <div className="relative px-5 py-4 border border-base-300 rounded-lg bg-base-100/80 backdrop-blur-sm overflow-hidden group hover:border-base-content/20 transition">
+    <div className="relative paper-card rounded-xl px-5 py-4 overflow-hidden group lift">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-[11px] font-medium uppercase tracking-wider text-base-content/50">
-          {label}
-        </p>
+        <p className="eyebrow text-base-content/45">{label}</p>
         {icon && (
           <span
-            className="text-base-content/40 group-hover:text-base-content/70 transition"
+            className="text-base-content/40 group-hover:text-base-content/80 transition-all duration-300 group-hover:scale-110"
             style={accentColor ? { color: accentColor } : undefined}
           >
             {icon}
           </span>
         )}
       </div>
-      <p className="num mt-2 text-xl font-semibold tracking-tight">{value}</p>
-      {hint && <p className="text-xs text-base-content/50 mt-1">{hint}</p>}
-      <span
-        className="absolute left-0 right-0 bottom-0 h-px bg-gradient-to-r from-transparent via-base-content/10 to-transparent"
+
+      <p className="num mt-3 text-xl font-semibold tracking-tightest leading-none">
+        {value}
+      </p>
+
+      {hint && (
+        <p className="text-[11px] text-base-content/50 mt-1.5 font-medium">
+          {hint}
+        </p>
+      )}
+
+      <div
+        className="absolute left-5 right-5 bottom-0 h-px overflow-hidden"
         aria-hidden
-      />
+      >
+        <span
+          className="block h-full bg-gradient-to-r from-transparent via-base-content/15 to-transparent translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-700"
+          style={
+            accentColor
+              ? {
+                  background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)`,
+                }
+              : undefined
+          }
+        />
+      </div>
     </div>
   );
 }
 
 type HeroProps = {
   label: string;
-  value: string;
-  meta?: string;
+  amount: number;
+  txCount: number;
   delta?: number | null;
-  sub?: React.ReactNode;
   sparkline?: number[];
+  monthLabel: string;
 };
 
 function Sparkline({ data }: { data: number[] }) {
@@ -48,9 +69,9 @@ function Sparkline({ data }: { data: number[] }) {
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min || 1;
-  const w = 96;
-  const h = 32;
-  const step = data.length > 1 ? w / (data.length - 1) : 0;
+  const w = 132;
+  const h = 40;
+  const step = w / (data.length - 1);
   const points = data.map((v, i) => {
     const x = i * step;
     const y = h - ((v - min) / range) * h;
@@ -73,65 +94,111 @@ function Sparkline({ data }: { data: number[] }) {
     >
       <defs>
         <linearGradient id="spark-fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="currentColor" stopOpacity="0.25" />
-          <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+          <stop offset="0%" stopColor="hsl(160 84% 39%)" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="hsl(160 84% 39%)" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient id="spark-stroke" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="hsl(160 84% 39%)" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="hsl(160 84% 39%)" stopOpacity="1" />
         </linearGradient>
       </defs>
-      <path d={areaPath} fill="url(#spark-fill)" className="text-primary" />
+      <path d={areaPath} fill="url(#spark-fill)" />
       <path
         d={path}
         fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
+        stroke="url(#spark-stroke)"
+        strokeWidth="1.75"
         strokeLinejoin="round"
         strokeLinecap="round"
-        className="text-primary"
+        className="draw-line"
+        style={{ strokeDasharray: 400, strokeDashoffset: 400 }}
       />
-      <circle cx={lastX} cy={lastY} r="2.5" className="fill-primary" />
       <circle
         cx={lastX}
         cy={lastY}
-        r="5"
-        className="fill-primary/20"
+        r="6"
+        fill="hsl(160 84% 39%)"
+        fillOpacity="0.18"
+        className="animate-pulse-glow"
       />
+      <circle cx={lastX} cy={lastY} r="2.5" fill="hsl(160 84% 39%)" />
     </svg>
   );
 }
 
 export function HeroStat({
   label,
-  value,
-  meta,
+  amount,
+  txCount,
   delta,
-  sub,
   sparkline,
+  monthLabel,
 }: HeroProps) {
   const showTrend = delta !== null && delta !== undefined;
   const trendUp = showTrend && (delta as number) > 0;
   const trendDown = showTrend && (delta as number) < 0;
 
   return (
-    <div className="accent-stripe-l relative overflow-hidden border border-base-300 rounded-lg bg-base-100/80 backdrop-blur-sm px-6 py-7 md:px-8 md:py-8">
-      <div className="absolute right-0 top-0 h-full w-2/3 bg-gradient-to-l from-primary/[0.08] via-primary/[0.02] to-transparent pointer-events-none" />
-      <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-primary/[0.05] blur-3xl pointer-events-none" />
+    <article className="accent-stripe-l relative overflow-hidden paper-card rounded-xl px-6 py-7 md:px-9 md:py-9 group">
+      {/* Atmospheric backdrop */}
+      <div
+        className="absolute -right-16 -top-20 w-72 h-72 rounded-full pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(circle, hsl(160 84% 39% / 0.08), transparent 70%)",
+        }}
+        aria-hidden
+      />
+      <div
+        className="absolute -left-10 -bottom-20 w-56 h-56 rounded-full pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(circle, hsl(20 91% 48% / 0.045), transparent 70%)",
+        }}
+        aria-hidden
+      />
 
-      <div className="relative flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6">
-        <div className="flex-1 min-w-0">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-base-content/50">
-            {label}
-          </p>
-          <div className="mt-2 flex items-baseline gap-2 flex-wrap">
-            <span className="num text-3xl md:text-4xl font-semibold tracking-tightest">
-              {value}
+      {/* Tilted stamp */}
+      <div className="absolute top-6 right-5 md:top-7 md:right-7 stamp text-base-content/55 hidden sm:inline-flex">
+        {monthLabel}
+      </div>
+
+      <div className="relative">
+        <p className="eyebrow text-base-content/55">{label}</p>
+
+        <div className="mt-3 md:mt-4 flex items-baseline gap-2 md:gap-3 flex-wrap">
+          <span className="display-num text-base-content/45 text-3xl md:text-4xl mr-0.5">
+            Rp
+          </span>
+          <h2 className="display-num text-5xl md:text-7xl leading-none text-base-content reveal-num">
+            <AnimatedNumber
+              value={amount}
+              format={(n) =>
+                Math.round(n).toLocaleString("id-ID", {
+                  maximumFractionDigits: 0,
+                })
+              }
+            />
+          </h2>
+        </div>
+
+        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm">
+          <div className="flex items-center gap-2 text-base-content/65">
+            <span className="num text-base-content/85 font-semibold">
+              {txCount}
             </span>
-            {showTrend && (
+            <span>transaksi tercatat</span>
+          </div>
+
+          {showTrend && (
+            <div className="flex items-center gap-1.5">
               <span
-                className={`inline-flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded ${
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
                   trendUp
-                    ? "text-error bg-error/10"
+                    ? "text-error bg-error/12"
                     : trendDown
-                      ? "text-primary bg-primary/10"
-                      : "text-base-content/50 bg-base-200"
+                      ? "text-primary bg-primary/12"
+                      : "text-base-content/55 bg-base-200"
                 }`}
               >
                 {trendUp ? (
@@ -144,23 +211,31 @@ export function HeroStat({
                   {(delta as number).toFixed(1)}%
                 </span>
               </span>
-            )}
-            {meta && (
-              <span className="text-xs text-base-content/50">{meta}</span>
-            )}
-          </div>
-          {sub && <div className="mt-3 text-sm text-base-content/70">{sub}</div>}
+              <span className="text-xs text-base-content/50">
+                vs bulan sebelumnya
+              </span>
+            </div>
+          )}
+
+          {!showTrend && (
+            <span className="text-xs text-base-content/45 italic">
+              belum ada pembanding bulan lalu
+            </span>
+          )}
         </div>
 
         {sparkline && sparkline.length >= 2 && (
-          <div className="shrink-0 self-start sm:self-end">
+          <div className="mt-6 flex items-end justify-between gap-4">
+            <div className="flex items-baseline gap-2">
+              <span className="eyebrow text-base-content/40">
+                Tren 12 bulan
+              </span>
+              <span className="w-8 h-px bg-base-content/15" aria-hidden />
+            </div>
             <Sparkline data={sparkline} />
-            <p className="text-[10px] uppercase tracking-wider text-base-content/40 mt-1 text-right">
-              12 bulan
-            </p>
           </div>
         )}
       </div>
-    </div>
+    </article>
   );
 }

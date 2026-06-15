@@ -2,7 +2,30 @@ node_modules
 .next
 .env
 .env*.local
+.env.production
 *.log
 .DS_Store
 .vercel
 next-env.d.ts
+
+# Credentials & deployment notes (jangan pernah di-commit)
+credential.txt
+credentials.txt
+*.credentials
+deploy.local.*
+
+# OS / Editor
+Thumbs.db
+.vscode/
+.idea/
+
+# Build artifacts
+tsconfig.tsbuildinfo
+
+# Project files tidak perlu di-repo
+*.zip
+*.png
+financetracker lanjut.txt
+server.js
+ss *.png
+screen.png

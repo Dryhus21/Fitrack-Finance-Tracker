@@ -113,19 +113,20 @@ export function TransactionManager() {
   ].filter(Boolean);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
+      {/* Filter rail */}
       <div className="flex flex-wrap items-center gap-2">
         <input
           type="month"
           value={monthKey}
           onChange={(e) => setParam("month", e.target.value)}
-          className="num px-3 py-1.5 text-sm bg-base-100 border border-base-300 rounded-md focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30"
+          className="num px-3 py-1.5 text-sm bg-base-100 border border-base-content/12 rounded-md focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/15 transition font-medium"
         />
 
         <select
           value={categoryParam}
           onChange={(e) => setParam("category", e.target.value)}
-          className="px-3 py-1.5 text-sm bg-base-100 border border-base-300 rounded-md focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30"
+          className="px-3 py-1.5 text-sm bg-base-100 border border-base-content/12 rounded-md focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/15 transition font-medium"
         >
           <option value="">Semua kategori</option>
           <option value="PRIMER">Primer</option>
@@ -148,7 +149,7 @@ export function TransactionManager() {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Cari nama…"
-            className="pl-8 pr-3 py-1.5 text-sm bg-base-100 border border-base-300 rounded-md focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30 w-full sm:w-40 md:w-56"
+            className="pl-8 pr-3 py-1.5 text-sm bg-base-100 border border-base-content/12 rounded-md focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/15 transition w-full sm:w-40 md:w-56 placeholder:text-base-content/35"
           />
           {searchParam && (
             <button
@@ -157,98 +158,102 @@ export function TransactionManager() {
                 setSearchInput("");
                 setParam("search", "");
               }}
-              className="ml-1 px-2 py-1 text-xs text-base-content/60 hover:text-base-content"
+              className="ml-1 px-2 py-1 text-xs text-base-content/55 hover:text-base-content press"
             >
               reset
             </button>
           )}
         </form>
 
-        <div className="ml-auto sm:ml-auto">
+        <div className="ml-auto">
           <button
             onClick={() => {
               setEditTarget(null);
               setFormOpen(true);
             }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-primary text-primary-content hover:bg-primary/90 transition shadow-sm shadow-primary/20"
+            className="group inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold rounded-md bg-primary text-primary-content hover:bg-primary/90 transition press shadow-md shadow-primary/25"
           >
-            <IconPlus size={14} />
+            <span className="transition-transform group-hover:rotate-90">
+              <IconPlus size={14} />
+            </span>
             Tambah
           </button>
         </div>
       </div>
 
-      <div className="border border-base-300 rounded-lg bg-base-100/80 backdrop-blur-sm overflow-hidden">
-        <div className="px-4 sm:px-5 py-3 border-b border-base-300 flex items-center justify-between gap-3">
-          <div className="flex flex-col sm:flex-row sm:items-baseline gap-0.5 sm:gap-3 min-w-0">
-            <p className="text-sm font-semibold tracking-tight">
-              <span className="num">{items.length}</span>
-              <span className="text-base-content/60 font-normal"> transaksi</span>
+      {/* Container */}
+      <div className="paper-card rounded-xl overflow-hidden">
+        <div className="px-4 sm:px-5 py-3.5 border-b border-base-content/6 flex items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-baseline gap-0.5 sm:gap-4 min-w-0">
+            <p className="text-sm font-semibold">
+              <span className="num text-base-content">{items.length}</span>
+              <span className="text-base-content/55 font-normal ml-1">
+                transaksi
+              </span>
             </p>
-            <p className="text-xs text-base-content/50 truncate">
-              Total{" "}
-              <span className="num text-base-content/80">
+            <p className="text-xs text-base-content/55 truncate flex items-center gap-2">
+              <span>Total</span>
+              <span className="num font-semibold text-base-content/85">
                 {formatRupiah(total)}
               </span>
               {activeFilters.length > 0 && (
-                <span className="ml-2 text-base-content/40">
-                  · {activeFilters.join(" · ")}
-                </span>
+                <>
+                  <span className="w-0.5 h-0.5 rounded-full bg-base-content/30" />
+                  <span className="text-base-content/45 italic">
+                    {activeFilters.join(" · ")}
+                  </span>
+                </>
               )}
             </p>
           </div>
           {loading && (
-            <span className="text-xs text-base-content/40">memuat…</span>
+            <span className="flex items-center gap-1.5 text-xs text-base-content/45">
+              <span className="w-1 h-1 rounded-full bg-primary animate-pulse" />
+              memuat
+            </span>
           )}
         </div>
 
         {items.length === 0 && !loading ? (
-          <div className="px-5 py-16 text-center">
-            <p className="text-sm text-base-content/60">
-              Tidak ada transaksi pada filter ini.
-            </p>
-            <button
-              onClick={() => {
-                setEditTarget(null);
-                setFormOpen(true);
-              }}
-              className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md border border-base-300 hover:bg-base-200 transition"
-            >
-              <IconPlus size={14} />
-              Tambah transaksi pertama
-            </button>
-          </div>
+          <EmptyState
+            onAdd={() => {
+              setEditTarget(null);
+              setFormOpen(true);
+            }}
+            hasFilter={activeFilters.length > 0}
+          />
         ) : (
           <>
-            <ul className="md:hidden divide-y divide-base-300">
+            {/* Mobile: cards */}
+            <ul className="md:hidden divide-y divide-base-content/5 stagger">
               {items.map((t) => (
-                <li key={t.id} className="px-4 py-3">
+                <li key={t.id} className="px-4 py-3.5 group">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium text-sm truncate">{t.name}</p>
+                      <p className="font-semibold text-sm truncate">{t.name}</p>
                       {t.note && (
-                        <p className="text-xs text-base-content/50 truncate mt-0.5">
+                        <p className="text-xs text-base-content/55 truncate mt-0.5 italic">
                           {t.note}
                         </p>
                       )}
                     </div>
-                    <p className="num text-sm font-semibold whitespace-nowrap">
+                    <p className="num text-sm font-semibold whitespace-nowrap tracking-tight">
                       {formatRupiah(t.price)}
                     </p>
                   </div>
-                  <div className="mt-2 flex items-center justify-between gap-2">
+                  <div className="mt-2.5 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 text-xs text-base-content/60 min-w-0">
                       <span
-                        className="w-1.5 h-1.5 rounded-sm shrink-0"
+                        className="w-2 h-2 rounded-sm shrink-0"
                         style={{
                           backgroundColor:
                             KATEGORI_WARNA[t.category] || "#737373",
                         }}
                       />
-                      <span className="truncate">
+                      <span className="truncate font-medium">
                         {KATEGORI_LABEL[t.category] || t.category}
                       </span>
-                      <span className="text-base-content/30">·</span>
+                      <span className="w-0.5 h-0.5 rounded-full bg-base-content/30" />
                       <span className="num whitespace-nowrap">
                         {formatTanggal(t.date)}
                       </span>
@@ -259,14 +264,14 @@ export function TransactionManager() {
                           setEditTarget(t);
                           setFormOpen(true);
                         }}
-                        className="p-2 rounded-md text-base-content/60 hover:text-base-content hover:bg-base-200 active:bg-base-300 transition"
+                        className="p-2 rounded-md text-base-content/55 hover:text-base-content hover:bg-base-200 active:bg-base-300 transition press"
                         aria-label="Edit"
                       >
                         <IconPencil size={14} />
                       </button>
                       <button
                         onClick={() => onDelete(t.id)}
-                        className="p-2 rounded-md text-base-content/60 hover:text-error hover:bg-error/10 active:bg-error/20 transition"
+                        className="p-2 rounded-md text-base-content/55 hover:text-error hover:bg-error/10 active:bg-error/20 transition press"
                         aria-label="Hapus"
                       >
                         <IconTrash size={14} />
@@ -277,38 +282,47 @@ export function TransactionManager() {
               ))}
             </ul>
 
+            {/* Desktop: table */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-[11px] uppercase tracking-wider text-base-content/50 bg-base-200/40">
-                    <th className="text-left font-medium px-5 py-2.5 w-32">Tanggal</th>
-                    <th className="text-left font-medium px-3 py-2.5">Nama</th>
-                    <th className="text-left font-medium px-3 py-2.5 w-32">Kategori</th>
-                    <th className="text-right font-medium px-3 py-2.5 w-36">Harga</th>
-                    <th className="text-right font-medium px-5 py-2.5 w-20"></th>
+                  <tr className="eyebrow text-base-content/45 bg-base-200/30">
+                    <th className="text-left font-semibold px-5 py-3 w-32">
+                      Tanggal
+                    </th>
+                    <th className="text-left font-semibold px-3 py-3">Nama</th>
+                    <th className="text-left font-semibold px-3 py-3 w-32">
+                      Kategori
+                    </th>
+                    <th className="text-right font-semibold px-3 py-3 w-36">
+                      Harga
+                    </th>
+                    <th className="text-right font-semibold px-5 py-3 w-20"></th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="stagger">
                   {items.map((t) => (
                     <tr
                       key={t.id}
-                      className="border-t border-base-300 hover:bg-base-200/40 transition group"
+                      className="border-t border-base-content/5 hover:bg-base-200/30 transition-all duration-200 group"
                     >
-                      <td className="px-5 py-3 num text-base-content/70 whitespace-nowrap">
+                      <td className="px-5 py-3.5 num text-base-content/65 whitespace-nowrap text-xs">
                         {formatTanggal(t.date)}
                       </td>
-                      <td className="px-3 py-3">
-                        <p className="font-medium">{t.name}</p>
+                      <td className="px-3 py-3.5">
+                        <p className="font-semibold group-hover:translate-x-0.5 transition-transform">
+                          {t.name}
+                        </p>
                         {t.note && (
-                          <p className="text-xs text-base-content/50 truncate max-w-md mt-0.5">
+                          <p className="text-xs text-base-content/55 truncate max-w-md mt-0.5 italic">
                             {t.note}
                           </p>
                         )}
                       </td>
-                      <td className="px-3 py-3">
-                        <span className="inline-flex items-center gap-1.5 text-xs text-base-content/70">
+                      <td className="px-3 py-3.5">
+                        <span className="inline-flex items-center gap-1.5 text-xs text-base-content/75 font-medium">
                           <span
-                            className="w-1.5 h-1.5 rounded-sm"
+                            className="w-2 h-2 rounded-sm transition-transform group-hover:scale-125"
                             style={{
                               backgroundColor:
                                 KATEGORI_WARNA[t.category] || "#737373",
@@ -317,17 +331,17 @@ export function TransactionManager() {
                           {KATEGORI_LABEL[t.category] || t.category}
                         </span>
                       </td>
-                      <td className="px-3 py-3 num text-right font-semibold whitespace-nowrap">
+                      <td className="px-3 py-3.5 num text-right font-semibold whitespace-nowrap tracking-tight">
                         {formatRupiah(t.price)}
                       </td>
-                      <td className="px-5 py-3 text-right">
+                      <td className="px-5 py-3.5 text-right">
                         <div className="flex justify-end gap-0.5">
                           <button
                             onClick={() => {
                               setEditTarget(t);
                               setFormOpen(true);
                             }}
-                            className="p-1.5 rounded-md text-base-content/40 hover:text-base-content hover:bg-base-200 transition"
+                            className="p-1.5 rounded-md text-base-content/40 hover:text-base-content hover:bg-base-200 transition press"
                             aria-label="Edit"
                             title="Edit"
                           >
@@ -335,7 +349,7 @@ export function TransactionManager() {
                           </button>
                           <button
                             onClick={() => onDelete(t.id)}
-                            className="p-1.5 rounded-md text-base-content/40 hover:text-error hover:bg-error/10 transition"
+                            className="p-1.5 rounded-md text-base-content/40 hover:text-error hover:bg-error/10 transition press"
                             aria-label="Hapus"
                             title="Hapus"
                           >
@@ -372,6 +386,93 @@ export function TransactionManager() {
         }}
         onSubmit={onSubmit}
       />
+    </div>
+  );
+}
+
+function EmptyState({
+  onAdd,
+  hasFilter,
+}: {
+  onAdd: () => void;
+  hasFilter: boolean;
+}) {
+  return (
+    <div className="px-5 py-16 text-center">
+      <div className="relative mx-auto w-24 h-24 mb-5">
+        {/* Floating coins illustration */}
+        <svg
+          width="96"
+          height="96"
+          viewBox="0 0 96 96"
+          className="absolute inset-0 text-base-content/15"
+          aria-hidden
+        >
+          <ellipse
+            cx="48"
+            cy="78"
+            rx="32"
+            ry="4"
+            fill="currentColor"
+            opacity="0.3"
+          />
+          <g className="animate-float">
+            <ellipse
+              cx="48"
+              cy="42"
+              rx="24"
+              ry="6"
+              fill="hsl(160 84% 39% / 0.15)"
+              stroke="hsl(160 84% 39% / 0.5)"
+              strokeWidth="1.5"
+            />
+            <ellipse
+              cx="48"
+              cy="38"
+              rx="24"
+              ry="6"
+              fill="hsl(160 84% 39% / 0.25)"
+              stroke="hsl(160 84% 39% / 0.6)"
+              strokeWidth="1.5"
+            />
+            <path
+              d="M48 38 v-4 M48 38 v4"
+              stroke="hsl(160 84% 39%)"
+              strokeWidth="1.5"
+            />
+            <text
+              x="48"
+              y="40"
+              textAnchor="middle"
+              fontSize="6"
+              fontWeight="700"
+              fill="hsl(160 84% 39%)"
+              fontFamily="var(--font-geist), system-ui, sans-serif"
+            >
+              Rp
+            </text>
+          </g>
+        </svg>
+      </div>
+      <p className="display-italic text-lg text-base-content/70 mb-1">
+        {hasFilter ? "Tidak ada yang cocok" : "Halaman masih bersih"}
+      </p>
+      <p className="text-xs text-base-content/55 mb-5 max-w-xs mx-auto">
+        {hasFilter
+          ? "Coba ubah filter atau bulan untuk melihat transaksi lain."
+          : "Catat transaksi pertama untuk mulai melihat pola pengeluaranmu."}
+      </p>
+      {!hasFilter && (
+        <button
+          onClick={onAdd}
+          className="group inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-md border border-primary/30 text-primary hover:bg-primary/10 transition press"
+        >
+          <span className="transition-transform group-hover:rotate-90">
+            <IconPlus size={14} />
+          </span>
+          Tambah transaksi pertama
+        </button>
+      )}
     </div>
   );
 }

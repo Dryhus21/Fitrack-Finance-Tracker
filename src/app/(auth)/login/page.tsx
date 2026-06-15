@@ -1,12 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function LoginPage() {
-  const router = useRouter();
+  return (
+    <Suspense>
+      <LoginInner />
+    </Suspense>
+  );
+}
+
+function LoginInner() {
   const sp = useSearchParams();
   const callbackUrl = sp.get("callbackUrl") || "/dashboard";
   const [email, setEmail] = useState("");
@@ -26,36 +34,52 @@ export default function LoginPage() {
       });
       if (res?.error) {
         setError("Email atau password salah.");
+        setLoading(false);
       } else {
-        router.push(callbackUrl);
-        router.refresh();
+        // Direct navigation — skips client router overhead
+        window.location.href = callbackUrl;
       }
     } catch {
       setError("Tidak bisa terhubung ke server.");
-    } finally {
       setLoading(false);
     }
   };
 
   return (
     <div>
-      <div className="md:hidden mb-8 flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-          <span className="text-primary-content text-[11px] font-bold tracking-tighter">
-            FT
-          </span>
+      {/* Mobile brand */}
+      <div className="md:hidden mb-10 flex items-center gap-2.5">
+        <Image
+          src="/logo.png"
+          alt="Fitrack"
+          width={38}
+          height={38}
+          className="rounded-full ring-1 ring-base-content/10"
+          priority
+        />
+        <div className="leading-none">
+          <p className="display text-base font-semibold tracking-tightest">
+            Fitrack
+          </p>
+          <p className="text-[9px] eyebrow text-base-content/45 mt-1">
+            Finance Tracker · Pribadi
+          </p>
         </div>
-        <span className="font-semibold tracking-tight">Finance</span>
       </div>
 
-      <h1 className="text-2xl font-semibold tracking-tight">Masuk</h1>
-      <p className="text-sm text-base-content/60 mt-1.5">
-        Gunakan email dan password kamu untuk lanjut.
-      </p>
+      <div className="space-y-1.5 mb-8">
+        <p className="eyebrow text-base-content/45">Masuk</p>
+        <h1 className="display text-3xl md:text-4xl tracking-tightest leading-tight">
+          <em className="display-italic">Selamat</em> kembali.
+        </h1>
+        <p className="text-sm text-base-content/60 mt-2">
+          Lanjutkan mencatat pengeluaran kamu.
+        </p>
+      </div>
 
-      <form onSubmit={onSubmit} className="mt-8 space-y-4">
+      <form onSubmit={onSubmit} className="space-y-4 stagger">
         <div>
-          <label className="block text-xs font-medium text-base-content/70 mb-1.5">
+          <label className="block eyebrow text-base-content/55 mb-2">
             Email
           </label>
           <input
@@ -64,17 +88,15 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="nama@email.com"
-            className="w-full px-3 py-2 text-sm bg-base-100 border border-base-300 rounded-md focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30 transition"
+            className="w-full px-3.5 py-2.5 text-sm bg-base-100 border border-base-content/12 rounded-md focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/15 transition placeholder:text-base-content/30"
             autoComplete="email"
           />
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-medium text-base-content/70">
-              Password
-            </label>
-          </div>
+          <label className="block eyebrow text-base-content/55 mb-2">
+            Password
+          </label>
           <input
             type="password"
             required
@@ -82,13 +104,14 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            className="w-full px-3 py-2 text-sm bg-base-100 border border-base-300 rounded-md focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30 transition"
+            className="num w-full px-3.5 py-2.5 text-sm bg-base-100 border border-base-content/12 rounded-md focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/15 transition tracking-wider placeholder:text-base-content/30"
             autoComplete="current-password"
           />
         </div>
 
         {error && (
-          <p className="text-xs text-error bg-error/10 border border-error/20 px-3 py-2 rounded-md">
+          <p className="text-xs text-error bg-error/10 border border-error/20 px-3 py-2.5 rounded-md flex items-center gap-2 animate-fade-up">
+            <span className="w-1.5 h-1.5 rounded-full bg-error" />
             {error}
           </p>
         )}
@@ -96,16 +119,37 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full px-3.5 py-2.5 text-sm font-medium rounded-md bg-primary text-primary-content hover:bg-primary/90 transition disabled:opacity-60 disabled:cursor-not-allowed"
+          className="group relative w-full px-3.5 py-3 text-sm font-semibold rounded-md bg-primary text-primary-content hover:bg-primary/90 transition press disabled:opacity-60 disabled:cursor-not-allowed shadow-md shadow-primary/20 overflow-hidden"
         >
-          {loading ? "Memproses…" : "Masuk"}
+          <span className="relative inline-flex items-center justify-center gap-2">
+            {loading ? (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-primary-content/50 animate-pulse" />
+                Memproses
+              </>
+            ) : (
+              <>
+                Masuk
+                <span className="transition-transform group-hover:translate-x-1">
+                  →
+                </span>
+              </>
+            )}
+          </span>
         </button>
       </form>
 
-      <p className="text-sm text-base-content/60 mt-6">
+      <p className="text-sm text-base-content/60 mt-7 divider-dot">
+        <span className="text-xs">atau</span>
+      </p>
+
+      <p className="text-sm text-base-content/60 mt-5 text-center">
         Belum punya akun?{" "}
-        <Link href="/register" className="text-primary hover:underline">
-          Daftar
+        <Link
+          href="/register"
+          className="text-primary font-semibold hover:underline underline-offset-4"
+        >
+          Daftar gratis
         </Link>
       </p>
     </div>

@@ -56,7 +56,7 @@ export function DashboardShell({
         closeMobile: () => setMobileOpen(false),
       }}
     >
-      <div className="min-h-screen flex bg-base-100 bg-dotted bg-glow relative">
+      <div className="min-h-screen flex bg-base-100 bg-paper bg-glow relative">
         <Sidebar
           userName={userName}
           userEmail={userEmail}

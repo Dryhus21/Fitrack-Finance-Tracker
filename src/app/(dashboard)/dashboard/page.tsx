@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { unstable_cache } from "next/cache";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { StatCard, HeroStat } from "@/components/dashboard/StatCard";
 import { MonthSelector } from "@/components/dashboard/MonthSelector";
@@ -15,6 +16,7 @@ import {
   KATEGORI_LABEL,
   KATEGORI_WARNA,
 } from "@/lib/format";
+import { format } from "date-fns";
 
 type SP = Promise<{ month?: string }>;
 
@@ -52,29 +54,42 @@ export default async function DashboardPage({
   const prevStart = new Date(start);
   prevStart.setUTCMonth(prevStart.getUTCMonth() - 1);
 
-  const [monthTx, prevMonthTx, recent, twelveMonthsTx] = await Promise.all([
-    prisma.transaction.findMany({
-      where: { userId, date: { gte: start, lt: end } },
-      orderBy: { date: "desc" },
-    }),
-    prisma.transaction.findMany({
-      where: { userId, date: { gte: prevStart, lt: start } },
-      select: { price: true },
-    }),
-    prisma.transaction.findMany({
-      where: { userId },
-      orderBy: { date: "desc" },
-      take: 5,
-    }),
-    (async () => {
+  const fetchDashboardData = unstable_cache(
+    async () => {
       const twelveStart = new Date(start);
       twelveStart.setUTCMonth(twelveStart.getUTCMonth() - 11);
-      return prisma.transaction.findMany({
-        where: { userId, date: { gte: twelveStart, lt: end } },
-        select: { price: true, date: true },
-      });
-    })(),
-  ]);
+      const [monthTxRaw, prevMonthTxRaw, recentRaw, twelveRaw] = await Promise.all([
+        prisma.transaction.findMany({
+          where: { userId, date: { gte: start, lt: end } },
+          orderBy: { date: "desc" },
+        }),
+        prisma.transaction.findMany({
+          where: { userId, date: { gte: prevStart, lt: start } },
+          select: { price: true },
+        }),
+        prisma.transaction.findMany({
+          where: { userId },
+          orderBy: { date: "desc" },
+          take: 5,
+        }),
+        prisma.transaction.findMany({
+          where: { userId, date: { gte: twelveStart, lt: end } },
+          select: { price: true, date: true },
+        }),
+      ]);
+      // Serialize Decimal + Date before caching — unstable_cache stores as JSON
+      return {
+        monthTx: monthTxRaw.map((t) => ({ ...t, price: t.price.toString(), date: t.date.toISOString(), createdAt: t.createdAt.toISOString(), updatedAt: t.updatedAt.toISOString() })),
+        prevMonthTx: prevMonthTxRaw.map((t) => ({ price: t.price.toString() })),
+        recent: recentRaw.map((t) => ({ ...t, price: t.price.toString(), date: t.date.toISOString(), createdAt: t.createdAt.toISOString(), updatedAt: t.updatedAt.toISOString() })),
+        twelveMonthsTx: twelveRaw.map((t) => ({ price: t.price.toString(), date: t.date.toISOString() })),
+      };
+    },
+    [`dashboard-${userId}-${monthKey}`],
+    { revalidate: 60, tags: [`user-${userId}`] },
+  );
+
+  const { monthTx, prevMonthTx, recent, twelveMonthsTx } = await fetchDashboardData();
 
   const total = monthTx.reduce((s, t) => s + Number(t.price), 0);
   const count = monthTx.length;
@@ -112,26 +127,7 @@ export default async function DashboardPage({
     if (b) b.total += Number(t.price);
   }
 
-  const deltaNode =
-    deltaPct === null ? (
-      <span className="text-base-content/50">tidak ada pembanding bulan lalu</span>
-    ) : (
-      <span>
-        <span
-          className={`num font-medium ${
-            deltaPct > 0
-              ? "text-error"
-              : deltaPct < 0
-                ? "text-primary"
-                : "text-base-content/60"
-          }`}
-        >
-          {deltaPct > 0 ? "+" : ""}
-          {deltaPct.toFixed(1)}%
-        </span>{" "}
-        <span className="text-base-content/50">vs bulan lalu</span>
-      </span>
-    );
+  const monthStampLabel = format(start, "MMM ''yy").toUpperCase();
 
   return (
     <>
@@ -141,15 +137,15 @@ export default async function DashboardPage({
         rightSlot={<MonthSelector currentMonth={monthKey} />}
       />
       <div className="px-4 sm:px-5 md:px-8 py-5 md:py-6 space-y-5 md:space-y-6 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 stagger">
           <div className="lg:col-span-2">
             <HeroStat
               label={`Pengeluaran ${formatBulan(start)}`}
-              value={formatRupiah(total)}
-              meta={`${count} transaksi`}
+              amount={total}
+              txCount={count}
               delta={deltaPct}
-              sub={deltaNode}
               sparkline={monthBuckets.map((b) => b.total)}
+              monthLabel={monthStampLabel}
             />
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
@@ -175,7 +171,7 @@ export default async function DashboardPage({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 stagger">
           <div className="lg:col-span-2">
             <CategoryPieChart data={byCategory} />
           </div>
@@ -184,15 +180,17 @@ export default async function DashboardPage({
           </div>
         </div>
 
-        <RecentTransactions
-          items={recent.map((t) => ({
-            id: t.id,
-            name: t.name,
-            price: t.price.toString(),
-            category: t.category,
-            date: t.date.toISOString(),
-          }))}
-        />
+        <div className="animate-fade-up" style={{ animationDelay: "0.3s" }}>
+          <RecentTransactions
+            items={recent.map((t) => ({
+              id: t.id,
+              name: t.name,
+              price: t.price,
+              category: t.category,
+              date: t.date,
+            }))}
+          />
+        </div>
       </div>
     </>
   );

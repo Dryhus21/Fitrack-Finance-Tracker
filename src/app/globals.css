@@ -3,70 +3,134 @@
 @tailwind utilities;
 
 @layer base {
-  html, body {
+  html,
+  body {
     @apply h-full;
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family: var(--font-geist), system-ui, -apple-system, sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
   }
+
+  body {
+    background-color: oklch(var(--b1));
+  }
+
+  /* Tabular numbers — for tables, lists, small data */
   .num {
+    font-family: var(--font-geist), system-ui, sans-serif;
     font-feature-settings: "tnum", "lnum", "zero";
     font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  /* Editorial display — for the hero rupiah numbers */
+  .display {
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 0;
+    letter-spacing: -0.045em;
+    font-weight: 500;
+  }
+
+  .display-italic {
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-style: italic;
+    font-variation-settings: "opsz" 144, "SOFT" 60, "WONK" 1;
+    letter-spacing: -0.025em;
+    font-weight: 500;
+  }
+
+  /* Sans-serif numbers — for large monetary values */
+  .display-num {
+    font-family: var(--font-geist), system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Section labels — small uppercase tracking */
+  .eyebrow {
+    font-family: var(--font-geist), sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 500;
+    font-size: 0.6875rem;
   }
 }
 
 @layer utilities {
+  /* Hairlines */
   .hairline-b {
-    box-shadow: inset 0 -1px 0 0 hsl(0 0% 100% / 0.06);
+    box-shadow: inset 0 -1px 0 0 oklch(var(--bc) / 0.06);
   }
 
+  /* Marker / highlighter underline — hand-drawn feel */
+  .marker {
+    background-image: linear-gradient(
+      to top,
+      oklch(0.76 0.165 161 / 0.28) 0%,
+      oklch(0.76 0.165 161 / 0.28) 32%,
+      transparent 32%,
+      transparent 100%
+    );
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    padding: 0 0.15em;
+  }
+
+  .marker-accent {
+    background-image: linear-gradient(
+      to top,
+      oklch(0.7 0.19 50 / 0.28) 0%,
+      oklch(0.7 0.19 50 / 0.28) 32%,
+      transparent 32%,
+      transparent 100%
+    );
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    padding: 0 0.15em;
+  }
+
+  /* Paper grain — subtle warm texture */
+  .bg-paper {
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      oklch(var(--bc) / 0.045) 1px,
+      transparent 0
+    );
+    background-size: 28px 28px;
+  }
+
+  /* Dotted grid — original variant, kept */
   .bg-dotted {
     background-image: radial-gradient(
       circle,
-      rgb(229 229 229 / 0.05) 1px,
+      oklch(var(--bc) / 0.045) 1px,
       transparent 1px
     );
     background-size: 22px 22px;
-    background-position: 0 0;
   }
 
+  /* Atmospheric glows — warm in the corners */
   .bg-glow {
     background-image:
       radial-gradient(
-        ellipse 70% 50% at 12% 0%,
-        rgb(16 185 129 / 0.10),
-        transparent 60%
+        ellipse 60% 50% at 8% 0%,
+        oklch(0.76 0.165 161 / 0.10),
+        transparent 65%
       ),
       radial-gradient(
-        ellipse 60% 40% at 88% 100%,
-        rgb(249 115 22 / 0.06),
+        ellipse 55% 45% at 92% 100%,
+        oklch(0.7 0.19 50 / 0.06),
+        transparent 65%
+      ),
+      radial-gradient(
+        ellipse 40% 30% at 100% 0%,
+        oklch(0.75 0.1 80 / 0.04),
         transparent 60%
       );
   }
 
-  /* Light theme override: dots lebih halus, glow lebih warm */
-  [data-theme="financeLight"] .bg-dotted {
-    background-image: radial-gradient(
-      circle,
-      rgb(10 10 10 / 0.06) 1px,
-      transparent 1px
-    );
-  }
-
-  [data-theme="financeLight"] .bg-glow {
-    background-image:
-      radial-gradient(
-        ellipse 70% 50% at 12% 0%,
-        rgb(5 150 105 / 0.07),
-        transparent 60%
-      ),
-      radial-gradient(
-        ellipse 60% 40% at 88% 100%,
-        rgb(234 88 12 / 0.05),
-        transparent 60%
-      );
-  }
-
-  /* Accent stripe vertikal untuk hero card */
+  /* Accent stripe — left edge of hero card */
   .accent-stripe-l {
     position: relative;
   }
@@ -74,27 +138,155 @@
     content: "";
     position: absolute;
     left: 0;
-    top: 0;
-    bottom: 0;
+    top: 1.25rem;
+    bottom: 1.25rem;
     width: 3px;
-    border-radius: 3px 0 0 3px;
+    border-radius: 3px;
     background: linear-gradient(
       to bottom,
-      rgb(16 185 129 / 0.8),
-      rgb(16 185 129 / 0)
+      oklch(0.76 0.165 161) 0%,
+      oklch(0.76 0.165 161 / 0.4) 60%,
+      transparent 100%
     );
   }
-  [data-theme="financeLight"] .accent-stripe-l::before {
+
+  /* Paper card — subtle blur + shadow */
+  .paper-card {
+    background: oklch(var(--b1) / 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid oklch(var(--bc) / 0.08);
+    box-shadow:
+      0 1px 0 0 oklch(var(--bc) / 0.04) inset,
+      0 24px 60px -24px oklch(var(--bc) / 0.12);
+  }
+
+  /* Press feedback — tactile button feel */
+  .press {
+    transition:
+      transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.2s ease;
+  }
+  .press:active {
+    transform: scale(0.97);
+  }
+
+  /* Lift on hover */
+  .lift {
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 40px -12px oklch(0.76 0.165 161 / 0.18);
+  }
+
+  /* Rotating stamp — like a date stamp on documents */
+  .stamp {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.55rem;
+    border: 1.5px solid currentColor;
+    border-radius: 4px;
+    font-family: var(--font-geist), system-ui, sans-serif;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transform: rotate(-2deg);
+    opacity: 0.85;
+  }
+
+  /* Decorative divider with dot */
+  .divider-dot::before,
+  .divider-dot::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: oklch(var(--bc) / 0.1);
+  }
+  .divider-dot {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* SVG draw-line animation */
+  .draw-line {
+    animation: drawLine 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes drawLine {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* Number reveal — count-up complement */
+  .reveal-num {
+    display: inline-block;
+    animation: revealNum 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  }
+  @keyframes revealNum {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Stagger helpers */
+  .stagger > * {
+    opacity: 0;
+    animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .stagger > *:nth-child(1) { animation-delay: 0.04s; }
+  .stagger > *:nth-child(2) { animation-delay: 0.1s; }
+  .stagger > *:nth-child(3) { animation-delay: 0.16s; }
+  .stagger > *:nth-child(4) { animation-delay: 0.22s; }
+  .stagger > *:nth-child(5) { animation-delay: 0.28s; }
+  .stagger > *:nth-child(6) { animation-delay: 0.34s; }
+  .stagger > *:nth-child(7) { animation-delay: 0.4s; }
+  .stagger > *:nth-child(8) { animation-delay: 0.46s; }
+  .stagger > *:nth-child(9) { animation-delay: 0.52s; }
+  .stagger > *:nth-child(10) { animation-delay: 0.58s; }
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Focus ring — refined */
+  .focus-ring:focus-visible {
+    outline: 2px solid oklch(0.76 0.165 161 / 0.5);
+    outline-offset: 2px;
+  }
+
+  /* Skeleton shimmer */
+  .skeleton {
     background: linear-gradient(
-      to bottom,
-      rgb(5 150 105 / 0.8),
-      rgb(5 150 105 / 0)
+      90deg,
+      oklch(var(--b2)) 0%,
+      oklch(var(--b3) / 0.6) 50%,
+      oklch(var(--b2)) 100%
     );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
   }
 }
 
 ::selection {
-  background: rgb(16 185 129 / 0.25);
+  background: oklch(0.76 0.165 161 / 0.25);
 }
 
 ::-webkit-scrollbar {
@@ -105,12 +297,12 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgb(115 115 115 / 0.2);
+  background: oklch(var(--bc) / 0.18);
   border-radius: 9999px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(115 115 115 / 0.4);
+  background: oklch(var(--bc) / 0.35);
   background-clip: padding-box;
 }

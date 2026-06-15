@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
+import { revalidateTag } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { transactionUpdateSchema } from "@/lib/validations";
@@ -45,6 +46,7 @@ export async function PATCH(
 
     const updated = await prisma.transaction.update({ where: { id }, data });
 
+    revalidateTag(`user-${session.user.id}`);
     return NextResponse.json({
       transaction: { ...updated, price: updated.price.toString() },
     });
@@ -70,5 +72,6 @@ export async function DELETE(
   }
 
   await prisma.transaction.delete({ where: { id } });
+  revalidateTag(`user-${session.user.id}`);
   return NextResponse.json({ ok: true });
 }

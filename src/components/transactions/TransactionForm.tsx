@@ -8,7 +8,7 @@ import { IconX } from "@/components/icons";
 
 export type TxFormValues = {
   name: string;
-  price: number;
+  price: number | string;
   category: CategoryType;
   date: string;
   note?: string;
@@ -22,9 +22,9 @@ type Props = {
 };
 
 const KATEGORI = [
-  { value: "PRIMER", label: "Primer", caption: "Kebutuhan pokok" },
-  { value: "SEKUNDER", label: "Sekunder", caption: "Pendukung" },
-  { value: "URGENCY", label: "Urgensi", caption: "Mendesak" },
+  { value: "PRIMER", label: "Primer", caption: "pokok", color: "#10b981" },
+  { value: "SEKUNDER", label: "Sekunder", caption: "pendukung", color: "#a3a3a3" },
+  { value: "URGENCY", label: "Urgensi", caption: "mendesak", color: "#f97316" },
 ] as const;
 
 export function TransactionForm({ open, initial, onClose, onSubmit }: Props) {
@@ -37,7 +37,7 @@ export function TransactionForm({ open, initial, onClose, onSubmit }: Props) {
   } = useForm<TxFormValues>({
     defaultValues: {
       name: "",
-      price: 0,
+      price: "",
       category: "PRIMER",
       date: tanggalInput(new Date()),
       note: "",
@@ -48,7 +48,7 @@ export function TransactionForm({ open, initial, onClose, onSubmit }: Props) {
     if (open) {
       reset({
         name: initial?.name ?? "",
-        price: initial?.price ?? 0,
+        price: initial?.price ?? "",
         category: (initial?.category as CategoryType) ?? "PRIMER",
         date: initial?.date ?? tanggalInput(new Date()),
         note: initial?.note ?? "",
@@ -64,15 +64,31 @@ export function TransactionForm({ open, initial, onClose, onSubmit }: Props) {
   const currentCategory = watch("category");
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-md bg-base-100 border border-base-300 rounded-lg shadow-2xl">
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-base-300">
-          <h3 className="text-sm font-semibold tracking-tight">
-            {initial?.id ? "Ubah transaksi" : "Transaksi baru"}
-          </h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in">
+      <div
+        className="w-full max-w-md paper-card rounded-xl shadow-2xl animate-fade-up"
+        style={{ animationDuration: "0.4s" }}
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-base-content/8">
+          <div>
+            <p className="eyebrow text-base-content/45">
+              {initial?.id ? "Mode ubah" : "Mode tambah"}
+            </p>
+            <h3 className="display text-lg tracking-tightest mt-0.5">
+              {initial?.id ? (
+                <>
+                  Edit <em className="display-italic">transaksi</em>
+                </>
+              ) : (
+                <>
+                  <em className="display-italic">Transaksi</em> baru
+                </>
+              )}
+            </h3>
+          </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-md hover:bg-base-200 text-base-content/60 hover:text-base-content transition"
+            className="p-1.5 rounded-md hover:bg-base-200 text-base-content/55 hover:text-base-content transition press"
             aria-label="Tutup"
           >
             <IconX size={16} />
@@ -81,27 +97,33 @@ export function TransactionForm({ open, initial, onClose, onSubmit }: Props) {
 
         <form onSubmit={submit} className="px-5 py-5 space-y-4">
           <div>
-            <label className="block text-xs font-medium text-base-content/70 mb-1.5">
+            <label className="block eyebrow text-base-content/55 mb-2">
               Nama barang
             </label>
             <input
-              {...register("name", { required: "Nama wajib diisi", maxLength: 120 })}
-              className="w-full px-3 py-2 text-sm bg-base-100 border border-base-300 rounded-md focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30 transition"
+              {...register("name", {
+                required: "Nama wajib diisi",
+                maxLength: 120,
+              })}
+              className="w-full px-3.5 py-2.5 text-sm bg-base-100 border border-base-content/12 rounded-md focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/15 transition placeholder:text-base-content/30"
               placeholder="Beras 5kg"
               autoFocus
             />
             {errors.name && (
-              <p className="text-xs text-error mt-1">{errors.name.message}</p>
+              <p className="text-xs text-error mt-1.5 flex items-center gap-1.5">
+                <span className="w-1 h-1 rounded-full bg-error" />
+                {errors.name.message}
+              </p>
             )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-base-content/70 mb-1.5">
+              <label className="block eyebrow text-base-content/55 mb-2">
                 Harga
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-base-content/40">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 display-num text-sm text-base-content/45 leading-none">
                   Rp
                 </span>
                 <input
@@ -110,32 +132,35 @@ export function TransactionForm({ open, initial, onClose, onSubmit }: Props) {
                   min="1"
                   {...register("price", {
                     required: "Harga wajib",
-                    valueAsNumber: true,
                     min: { value: 1, message: "Harus > 0" },
+                    setValueAs: (v) => (v === "" || v === null ? "" : Number(v)),
                   })}
-                  className="num w-full pl-9 pr-3 py-2 text-sm bg-base-100 border border-base-300 rounded-md focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30 transition"
+                  className="num w-full pl-9 pr-3 py-2.5 text-sm bg-base-100 border border-base-content/12 rounded-md focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/15 transition font-semibold tracking-tight"
                   placeholder="75000"
                 />
               </div>
               {errors.price && (
-                <p className="text-xs text-error mt-1">{errors.price.message}</p>
+                <p className="text-xs text-error mt-1.5 flex items-center gap-1.5">
+                  <span className="w-1 h-1 rounded-full bg-error" />
+                  {errors.price.message}
+                </p>
               )}
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-base-content/70 mb-1.5">
+              <label className="block eyebrow text-base-content/55 mb-2">
                 Tanggal
               </label>
               <input
                 type="date"
                 {...register("date", { required: "Tanggal wajib" })}
-                className="num w-full px-3 py-2 text-sm bg-base-100 border border-base-300 rounded-md focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30 transition"
+                className="num w-full px-3.5 py-2.5 text-sm bg-base-100 border border-base-content/12 rounded-md focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/15 transition font-medium"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-base-content/70 mb-1.5">
+            <label className="block eyebrow text-base-content/55 mb-2">
               Kategori
             </label>
             <div className="grid grid-cols-3 gap-1.5">
@@ -144,10 +169,10 @@ export function TransactionForm({ open, initial, onClose, onSubmit }: Props) {
                 return (
                   <label
                     key={c.value}
-                    className={`relative flex flex-col gap-0.5 px-3 py-2 border rounded-md cursor-pointer transition text-left ${
+                    className={`relative flex flex-col gap-0.5 px-2 sm:px-3 py-2.5 border rounded-md cursor-pointer transition-all text-left press ${
                       checked
-                        ? "border-primary bg-primary/[0.08]"
-                        : "border-base-300 hover:border-base-content/30"
+                        ? "border-primary bg-primary/10 shadow-sm shadow-primary/15"
+                        : "border-base-content/12 hover:border-base-content/30 hover:bg-base-200/40"
                     }`}
                   >
                     <input
@@ -156,12 +181,19 @@ export function TransactionForm({ open, initial, onClose, onSubmit }: Props) {
                       {...register("category", { required: true })}
                       className="sr-only"
                     />
-                    <span
-                      className={`text-sm font-medium ${checked ? "text-primary" : ""}`}
-                    >
-                      {c.label}
+                    <span className="flex items-center gap-1.5">
+                      <span
+                        className="w-2 h-2 rounded-sm"
+                        style={{ backgroundColor: c.color }}
+                        aria-hidden
+                      />
+                      <span
+                        className={`text-xs sm:text-sm font-semibold ${checked ? "text-primary" : ""}`}
+                      >
+                        {c.label}
+                      </span>
                     </span>
-                    <span className="text-[10px] text-base-content/50">
+                    <span className="text-[10px] text-base-content/50 italic ml-3.5">
                       {c.caption}
                     </span>
                   </label>
@@ -171,32 +203,47 @@ export function TransactionForm({ open, initial, onClose, onSubmit }: Props) {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-base-content/70 mb-1.5">
-              Catatan <span className="text-base-content/40">(opsional)</span>
+            <label className="block eyebrow text-base-content/55 mb-2">
+              Catatan{" "}
+              <span className="normal-case tracking-normal text-base-content/40 italic">
+                opsional
+              </span>
             </label>
             <textarea
               {...register("note", { maxLength: 500 })}
-              className="w-full px-3 py-2 text-sm bg-base-100 border border-base-300 rounded-md focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30 transition resize-none"
+              className="w-full px-3.5 py-2.5 text-sm bg-base-100 border border-base-content/12 rounded-md focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/15 transition resize-none placeholder:text-base-content/30"
               rows={2}
               placeholder="Detail tambahan"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-1">
+          <div className="flex items-center justify-end gap-2 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 text-sm rounded-md text-base-content/70 hover:text-base-content hover:bg-base-200 transition"
+              className="px-3.5 py-2 text-sm rounded-md text-base-content/65 hover:text-base-content hover:bg-base-200 transition press font-medium"
               disabled={isSubmitting}
             >
               Batal
             </button>
             <button
               type="submit"
-              className="px-3.5 py-1.5 text-sm font-medium rounded-md bg-primary text-primary-content hover:bg-primary/90 transition disabled:opacity-60 disabled:cursor-not-allowed"
+              className="group px-4 py-2 text-sm font-semibold rounded-md bg-primary text-primary-content hover:bg-primary/90 transition press disabled:opacity-60 disabled:cursor-not-allowed shadow-md shadow-primary/25 inline-flex items-center gap-2"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Menyimpan…" : initial?.id ? "Simpan" : "Tambah"}
+              {isSubmitting ? (
+                <>
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary-content/50 animate-pulse" />
+                  Menyimpan
+                </>
+              ) : (
+                <>
+                  {initial?.id ? "Simpan" : "Tambah"}
+                  <span className="transition-transform group-hover:translate-x-1">
+                    →
+                  </span>
+                </>
+              )}
             </button>
           </div>
         </form>

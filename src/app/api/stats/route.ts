@@ -84,12 +84,19 @@ export async function GET(req: Request) {
     if (bucket) bucket.total += Number(t.price);
   }
 
-  return NextResponse.json({
-    total,
-    average,
-    count,
-    topCategory,
-    byCategory,
-    byMonth: monthBuckets,
-  });
+  return NextResponse.json(
+    {
+      total,
+      average,
+      count,
+      topCategory,
+      byCategory,
+      byMonth: monthBuckets,
+    },
+    {
+      headers: {
+        "Cache-Control": "private, max-age=30, stale-while-revalidate=60",
+      },
+    },
+  );
 }

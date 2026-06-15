@@ -9,12 +9,21 @@ Finance Tracker — multi-user personal expense tracker with category buckets (P
 ## Stack
 
 - Next.js 15 App Router + TypeScript (strict)
-- Prisma 5 + MySQL (local: XAMPP/phpMyAdmin on `finance_app`)
+- Prisma 5 + **PostgreSQL via Supabase** (pooled URL untuk runtime serverless, direct URL untuk migrate)
 - NextAuth v5 beta (Credentials provider, JWT session) + bcryptjs
 - Tailwind + DaisyUI (custom themes `finance` dark / `financeLight` light)
 - Recharts, react-hook-form, zod, date-fns (id locale)
+- Deployment target: **Vercel**
 
 Path alias: `@/*` → `src/*`.
+
+### Database connection (Supabase)
+
+`prisma/schema.prisma` punya dua URL di datasource:
+- `url = env("DATABASE_URL")` — **pooled** (PgBouncer, port 6543). Dipakai runtime app. Wajib `?pgbouncer=true&connection_limit=1` untuk hindari connection leaks di serverless.
+- `directUrl = env("DIRECT_URL")` — **direct** (port 5432). Dipakai `prisma migrate` / `prisma db push` saja. Tidak dipakai runtime.
+
+Pastikan kedua URL ada di `.env` lokal dan di Vercel Project Settings → Environment Variables.
 
 ## Commands
 
@@ -103,6 +112,7 @@ Charts are Recharts; colors come from `KATEGORI_WARNA`.
 
 ## Notes for changes
 
-- When you change `prisma/schema.prisma`, run `npx prisma migrate dev --name <change>` and commit the generated migration in `prisma/migrations/`.
+- When you change `prisma/schema.prisma`, run `npx prisma migrate dev --name <change>` and commit the generated migration in `prisma/migrations/`. Prisma will use `DIRECT_URL` for this.
 - New API routes go under `src/app/api/.../route.ts`, must call `auth()` first, return 401 if no `session.user.id`, and scope all queries by `userId`.
 - Don't introduce a second Prisma client or a second NextAuth config — both are intentionally singletons.
+- `server.js` di root adalah artefak dari deploy cPanel sebelumnya. **Vercel tidak butuh** — bisa dihapus aman, tidak mempengaruhi Vercel deploy (Vercel auto-detect Next.js app).

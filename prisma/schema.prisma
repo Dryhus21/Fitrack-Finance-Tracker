@@ -3,8 +3,11 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  // Pooled connection (PgBouncer) — dipakai oleh Next.js runtime (serverless di Vercel)
+  url       = env("DATABASE_URL")
+  // Direct connection — dipakai Prisma untuk `migrate` & `db push` saja
+  directUrl = env("DIRECT_URL")
 }
 
 model User {

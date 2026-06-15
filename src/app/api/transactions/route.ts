@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
+import { revalidateTag } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
@@ -40,12 +41,19 @@ export async function GET(req: Request) {
     take: 500,
   });
 
-  return NextResponse.json({
-    transactions: transactions.map((t) => ({
-      ...t,
-      price: t.price.toString(),
-    })),
-  });
+  return NextResponse.json(
+    {
+      transactions: transactions.map((t) => ({
+        ...t,
+        price: t.price.toString(),
+      })),
+    },
+    {
+      headers: {
+        "Cache-Control": "private, max-age=30, stale-while-revalidate=60",
+      },
+    },
+  );
 }
 
 export async function POST(req: Request) {
@@ -75,6 +83,7 @@ export async function POST(req: Request) {
       },
     });
 
+    revalidateTag(`user-${session.user.id}`);
     return NextResponse.json(
       { transaction: { ...created, price: created.price.toString() } },
       { status: 201 },
