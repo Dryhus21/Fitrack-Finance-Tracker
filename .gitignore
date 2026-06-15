@@ -24,8 +24,9 @@ tsconfig.tsbuildinfo
 
 # Project files tidak perlu di-repo
 *.zip
-*.png
 financetracker lanjut.txt
 server.js
 ss *.png
 screen.png
+ss supabase*.png
+ss error*.png
