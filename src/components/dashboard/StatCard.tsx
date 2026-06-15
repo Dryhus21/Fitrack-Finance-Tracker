@@ -26,12 +26,12 @@ export function StatCard({ label, value, hint, icon, accentColor }: StatProps) {
         )}
       </div>
 
-      <p className="num mt-3 text-xl font-semibold tracking-tightest leading-none">
+      <p className="num mt-3 text-xl font-semibold tracking-tightest leading-none truncate">
         {value}
       </p>
 
       {hint && (
-        <p className="text-[11px] text-base-content/50 mt-1.5 font-medium">
+        <p className="text-[11px] text-base-content/50 mt-1.5 font-medium truncate">
           {hint}
         </p>
       )}

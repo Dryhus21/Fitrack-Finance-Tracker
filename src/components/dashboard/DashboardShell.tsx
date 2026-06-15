@@ -56,14 +56,14 @@ export function DashboardShell({
         closeMobile: () => setMobileOpen(false),
       }}
     >
-      <div className="min-h-screen flex bg-base-100 bg-paper bg-glow relative">
+      <div className="flex h-screen overflow-hidden bg-base-100 bg-paper bg-glow relative">
         <Sidebar
           userName={userName}
           userEmail={userEmail}
           mobileOpen={mobileOpen}
           onClose={() => setMobileOpen(false)}
         />
-        <main className="flex-1 min-w-0 relative">{children}</main>
+        <main className="flex-1 min-w-0 relative overflow-y-auto">{children}</main>
       </div>
     </Ctx.Provider>
   );

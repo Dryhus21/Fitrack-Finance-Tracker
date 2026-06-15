@@ -22,7 +22,7 @@ export function Sidebar({ userName, userEmail, mobileOpen, onClose }: Props) {
   const initial = userName.trim().charAt(0).toUpperCase() || "?";
 
   const body = (
-    <>
+    <div className="flex flex-col h-full overflow-hidden select-none">
       <div className="px-5 py-5">
         <div className="flex items-center justify-between">
           <Link
@@ -96,14 +96,14 @@ export function Sidebar({ userName, userEmail, mobileOpen, onClose }: Props) {
         </nav>
       </div>
 
-      <div className="mt-auto px-3 py-4 border-t border-base-content/5">
-        <div className="px-2 py-2 rounded-lg bg-base-200/40 flex items-center gap-2.5">
+      <div className="mt-auto px-3 py-4 border-t border-base-content/5 shrink-0">
+        <div className="px-2 py-2 rounded-lg bg-base-200/40 flex items-center gap-2.5 min-w-0">
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary/60 border border-primary/40 flex items-center justify-center shrink-0 shadow-sm shadow-primary/20">
             <span className="display-italic text-sm font-semibold text-primary-content">
               {initial}
             </span>
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold truncate leading-tight">
               {userName}
             </p>
@@ -113,12 +113,12 @@ export function Sidebar({ userName, userEmail, mobileOpen, onClose }: Props) {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 
   return (
     <>
-      <aside className="hidden md:flex md:flex-col w-60 border-r border-base-content/8 min-h-screen bg-base-100/60 backdrop-blur-md relative z-10">
+      <aside className="hidden md:flex md:flex-col w-60 shrink-0 border-r border-base-content/8 h-screen sticky top-0 bg-base-100/60 backdrop-blur-md z-10">
         {body}
       </aside>
 
