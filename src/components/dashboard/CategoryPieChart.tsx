@@ -212,24 +212,24 @@ export function CategoryPieChart({ data }: { data: Item[] }) {
                       : "hover:bg-base-200/40"
                   }`}
                 >
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between text-sm gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <span
-                        className={`w-2.5 h-2.5 rounded-sm transition-transform ${isHover ? "scale-125" : ""}`}
+                        className={`w-2.5 h-2.5 rounded-sm shrink-0 transition-transform ${isHover ? "scale-125" : ""}`}
                         style={{
                           backgroundColor:
                             KATEGORI_WARNA[item.category] || "#737373",
                         }}
                       />
-                      <span className="text-base-content/85 font-medium">
+                      <span className="text-base-content/85 font-medium truncate">
                         {KATEGORI_LABEL[item.category] || item.category}
                       </span>
                     </div>
-                    <span className="num text-xs text-base-content/55 font-medium">
+                    <span className="num text-xs text-base-content/55 font-medium shrink-0">
                       {pct.toFixed(0)}%
                     </span>
                   </div>
-                  <p className="num pl-4.5 text-xs text-base-content/65 mt-0.5 font-medium">
+                  <p className="num pl-[18px] text-xs text-base-content/65 mt-0.5 font-medium">
                     {formatRupiah(item.value)}
                   </p>
                 </button>
