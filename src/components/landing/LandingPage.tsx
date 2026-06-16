@@ -266,7 +266,7 @@ function Philosophy() {
               </span>
             </div>
 
-            <h3 className="display text-2xl tracking-tightest leading-tight mb-3">
+            <h3 className="display text-2xl tracking-tight leading-snug mb-3">
               <em className="display-italic">{k.title.split(" ")[0]}</em>{" "}
               {k.title.split(" ").slice(1).join(" ")}
             </h3>
